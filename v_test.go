@@ -329,3 +329,87 @@ func TestV_Validate_json_name_nested(t *testing.T) {
 		t.Fatalf("the error should be nonzero: %s", nested_errs["z"])
 	}
 }
+
+func TestV_Validate_field_order(t *testing.T) {
+	type X struct {
+		Z string `validate:"longer"`
+		A string `validate:"longer"`
+		B string `validate:"longer"`
+		C string
+		D string `validate:"longer"`
+		E string
+	}
+
+	maxLen := 4
+	vd := make(V)
+	vd["long"] = func(i interface{}) error {
+		s := i.(string)
+		if len(s) < 5 {
+			return fmt.Errorf("%q is too short", s)
+		}
+		maxLen = len(s)
+		return nil
+	}
+	vd["longer"] = func(i interface{}) error {
+		s := i.(string)
+		if len(s) <= maxLen {
+			return fmt.Errorf("%q is too short, should be longer than %d",
+				s, maxLen)
+		}
+		maxLen = len(s)
+		return nil
+	}
+
+	maxLen = 4
+	errs := vd.Validate(X{
+		Z: "12345",
+		A: "hello there",
+		B: "hi, hi, hi!!!",
+		C: "help me",
+		D: "I am not validated",
+	})
+	if len(errs) != 0 {
+		t.Fatal("wrong number of errors:", errs)
+	}
+
+	maxLen = 3
+	errs = vd.Validate(X{
+		Z: "123",
+		A: "hello there",
+		B: "hi, hi, hi!!!",
+		C: "help me",
+		D: "I am not validated",
+	})
+	if len(errs) != 1 {
+		t.Fatal("wrong number of errors:", errs)
+	}
+	if errs["Z"].(error).Error() != `"123" is too short, should be longer than 3` {
+		t.Fatal("error for Z field is wrong:", errs)
+	}
+
+	maxLen = 3
+	errs = vd.Validate(X{
+		Z: "123",
+		A: "h",
+		B: "2",
+		C: "help me",
+		D: "I",
+	})
+	if len(errs) != 4 {
+		t.Fatal("wrong number of errors:", errs)
+	}
+	if errs["Z"].(error).Error() != `"123" is too short, should be longer than 3` {
+		t.Fatal("error for Z field is wrong:", errs)
+	}
+	if errs["A"].(error).Error() != `"h" is too short, should be longer than 3` {
+		t.Fatal("error for Z field is wrong:", errs)
+	}
+	if errs["B"].(error).Error() != `"2" is too short, should be longer than 3` {
+		t.Fatal("error for Z field is wrong:", errs)
+	}
+	if errs["D"].(error).Error() != `"I" is too short, should be longer than 3` {
+		t.Fatal("error for Z field is wrong:", errs)
+	}
+
+	// Output: map[C:"help me" is too long]
+}
