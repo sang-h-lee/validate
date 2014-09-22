@@ -261,3 +261,71 @@ func TestV_Validate_nonstruct(t *testing.T) {
 		t.Fatalf("non-structs should always pass validation: %v", errs)
 	}
 }
+
+func TestV_Validate_json_name(t *testing.T) {
+	type X struct {
+		A int `json:"z" validate:"nonzero"`
+	}
+
+	vd := make(V)
+	vd["nonzero"] = func(i interface{}) error {
+		n := i.(int)
+		if n == 0 {
+			return fmt.Errorf("should be nonzero")
+		}
+		return nil
+	}
+
+	errs := vd.Validate(X{
+		A: 0,
+	})
+
+	if len(errs) != 1 {
+		t.Fatal("wrong number of errors for two failures:", errs)
+	}
+	if errs["z"] == nil {
+		t.Fatal("an error for z field should be present:", errs)
+	}
+	if errs["z"].(error).Error() != "should be nonzero" {
+		t.Fatalf("the error should be nonzero: %s", errs["z"])
+	}
+}
+
+func TestV_Validate_json_name_nested(t *testing.T) {
+	type Z struct {
+		B int `json:"z" validate:"nonzero"`
+	}
+	type X struct {
+		A Z `json:"xxx" validate:"struct"`
+	}
+
+	vd := make(V)
+	vd["nonzero"] = func(i interface{}) error {
+		n := i.(int)
+		if n == 0 {
+			return fmt.Errorf("should be nonzero")
+		}
+		return nil
+	}
+
+	errs := vd.Validate(X{A: Z{
+		B: 0,
+	}})
+
+	if len(errs) != 1 {
+		t.Fatal("wrong number of errors for two failures:", errs)
+	}
+	if errs["xxx"] == nil {
+		t.Fatal("an error for xxx field should be present:", errs)
+	}
+	nested_errs, ok := errs["xxx"].(map[string]interface{})
+	if !ok {
+		t.Fatal("an error for xxx should be a map:", nested_errs)
+	}
+	if nested_errs["z"] == nil {
+		t.Fatal("an error for z field should be present:", nested_errs)
+	}
+	if nested_errs["z"].(error).Error() != "should be nonzero" {
+		t.Fatalf("the error should be nonzero: %s", nested_errs["z"])
+	}
+}

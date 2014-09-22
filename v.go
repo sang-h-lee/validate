@@ -84,12 +84,17 @@ func (v V) validate(errs map[string]interface{}, s interface{}) {
 		}
 		vts := strings.Split(tag, ",")
 
+		fieldName := f.Name
+		if jsonTag := f.Tag.Get("json"); jsonTag != "" {
+			fieldName = strings.SplitN(jsonTag, ",", 2)[0]
+		}
+
 		for _, vt := range vts {
 			if vt == "struct" {
 				errs2 := v.Validate(val)
 				if errs2 != nil {
 					/* A field validation has failed */
-					errs[f.Name] = errs2
+					errs[fieldName] = errs2
 					break
 				}
 				continue
@@ -97,11 +102,11 @@ func (v V) validate(errs map[string]interface{}, s interface{}) {
 
 			vf := v[vt]
 			if vf == nil {
-				errs[f.Name] = fmt.Errorf("undefined validator: %q", vt)
+				errs[fieldName] = fmt.Errorf("undefined validator: %q", vt)
 				break
 			}
 			if err := vf(val); err != nil {
-				errs[f.Name] = err
+				errs[fieldName] = err
 				break
 			}
 		}
