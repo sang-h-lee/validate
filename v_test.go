@@ -36,7 +36,7 @@ func ExampleV_Validate() {
 		D: "I am not validated",
 	}))
 
-	// Output: [field C is invalid: "help me" is too long]
+	// Output: map[C:"help me" is too long]
 }
 
 func TestV_Validate_allgood(t *testing.T) {
@@ -76,15 +76,18 @@ func TestV_Validate_undef(t *testing.T) {
 	if len(errs) == 0 {
 		t.Fatal("no errors returned for an undefined validator")
 	}
-	if len(errs) > 1 {
+	if len(errs) != 1 {
 		t.Fatalf("too many errors returns for an undefined validator: %v", errs)
 	}
-	if errs[0].Error() != `field A is invalid: undefined validator: "oops"` {
-		t.Fatal("wrong message for an undefined validator:", errs[0].Error())
+	if errs["A"] == nil {
+		t.Fatalf("expected error for field A: %v", errs)
+	}
+	if errs["A"].(error).Error() != `undefined validator: "oops"` {
+		t.Fatal("wrong message for an undefined validator:", errs["A"])
 	}
 }
 
-func TestV_Validate_multi(t *testing.T) {
+func TestV_Validate_multi_first_fails(t *testing.T) {
 	type X struct {
 		A int `validate:"nonzero,odd"`
 	}
@@ -107,15 +110,48 @@ func TestV_Validate_multi(t *testing.T) {
 	errs := vd.Validate(X{
 		A: 0,
 	})
-
-	if len(errs) != 2 {
+	if len(errs) != 1 {
 		t.Fatalf("wrong number of errors for two failures: %v", errs)
 	}
-	if errs[0].Error() != "field A is invalid: should be nonzero" {
-		t.Fatal("first error should be nonzero:", errs[0])
+	if errs["A"] == nil {
+		t.Fatalf("expected error for field A: %v", errs)
 	}
-	if errs[1].Error() != "field A is invalid: 0 is not odd" {
-		t.Fatal("second error should be odd:", errs[1])
+	if errs["A"].(error).Error() != "should be nonzero" {
+		t.Fatal("first error should be nonzero:", errs["A"])
+	}
+}
+
+func TestV_Validate_multi_first_passes(t *testing.T) {
+	type X struct {
+		A int `validate:"nonzero,odd"`
+	}
+
+	vd := make(V)
+	vd["nonzero"] = func(i interface{}) error {
+		n := i.(int)
+		if n == 0 {
+			return fmt.Errorf("should be nonzero")
+		}
+		return nil
+	}
+	vd["odd"] = func(i interface{}) error {
+		n := i.(int)
+		if n&1 == 0 {
+			return fmt.Errorf("%d is not odd", n)
+		}
+		return nil
+	}
+	errs := vd.Validate(X{
+		A: 2,
+	})
+	if len(errs) != 1 {
+		t.Fatalf("wrong number of errors for two failures: %v", errs)
+	}
+	if errs["A"] == nil {
+		t.Fatalf("expected error for field A: %v", errs)
+	}
+	if errs["A"].(error).Error() != "2 is not odd" {
+		t.Fatal("second error should be odd:", errs["A"])
 	}
 }
 
@@ -148,12 +184,47 @@ func ExampleV_Validate_struct() {
 		A: 0,
 	}})
 
-	for _, err := range errs {
-		fmt.Println(err)
+	for k, err := range errs {
+		fmt.Printf("%s=>%v\n", k, err)
 	}
 
-	// Output: field A is invalid: should be nonzero
-	// field X is invalid: 0 is not odd
+	// Output: X=>map[A:should be nonzero]
+}
+
+func ExampleV_Validate_struct2() {
+	type X struct {
+		A int `validate:"nonzero"`
+	}
+
+	type Y struct {
+		X `validate:"struct,odd"`
+	}
+
+	vd := make(V)
+	vd["nonzero"] = func(i interface{}) error {
+		n := i.(int)
+		if n == 0 {
+			return fmt.Errorf("should be nonzero")
+		}
+		return nil
+	}
+	vd["odd"] = func(i interface{}) error {
+		x := i.(X)
+		if x.A&1 == 0 {
+			return fmt.Errorf("%d is not odd", x.A)
+		}
+		return nil
+	}
+
+	errs := vd.Validate(Y{X{
+		A: 2,
+	}})
+
+	for k, err := range errs {
+		fmt.Printf("%s=>%v\n", k, err)
+	}
+
+	// Output: X=>2 is not odd
 }
 
 func TestV_Validate_uninterfaceable(t *testing.T) {
