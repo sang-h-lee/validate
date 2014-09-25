@@ -41,8 +41,10 @@ import (
 	"strings"
 )
 
+type ValidatorFn func(interface{}) interface{}
+
 // V is a map of tag names to validators.
-type V map[string]func(interface{}) error
+type V map[string]ValidatorFn
 
 // Validate accepts a struct (or a pointer) and returns a list of errors for all
 // fields that are invalid. If all fields are valid, or s is not a struct type,

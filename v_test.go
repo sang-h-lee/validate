@@ -14,14 +14,14 @@ func ExampleV_Validate() {
 	}
 
 	vd := make(V)
-	vd["long"] = func(i interface{}) error {
+	vd["long"] = func(i interface{}) interface{} {
 		s := i.(string)
 		if len(s) < 5 {
 			return fmt.Errorf("%q is too short", s)
 		}
 		return nil
 	}
-	vd["short"] = func(i interface{}) error {
+	vd["short"] = func(i interface{}) interface{} {
 		s := i.(string)
 		if len(s) >= 5 {
 			return fmt.Errorf("%q is too long", s)
@@ -45,7 +45,7 @@ func TestV_Validate_allgood(t *testing.T) {
 	}
 
 	vd := make(V)
-	vd["odd"] = func(i interface{}) error {
+	vd["odd"] = func(i interface{}) interface{} {
 		n := i.(int)
 		if n&1 == 0 {
 			return fmt.Errorf("%d is not odd", n)
@@ -93,14 +93,14 @@ func TestV_Validate_multi_first_fails(t *testing.T) {
 	}
 
 	vd := make(V)
-	vd["nonzero"] = func(i interface{}) error {
+	vd["nonzero"] = func(i interface{}) interface{} {
 		n := i.(int)
 		if n == 0 {
 			return fmt.Errorf("should be nonzero")
 		}
 		return nil
 	}
-	vd["odd"] = func(i interface{}) error {
+	vd["odd"] = func(i interface{}) interface{} {
 		n := i.(int)
 		if n&1 == 0 {
 			return fmt.Errorf("%d is not odd", n)
@@ -127,14 +127,14 @@ func TestV_Validate_multi_first_passes(t *testing.T) {
 	}
 
 	vd := make(V)
-	vd["nonzero"] = func(i interface{}) error {
+	vd["nonzero"] = func(i interface{}) interface{} {
 		n := i.(int)
 		if n == 0 {
 			return fmt.Errorf("should be nonzero")
 		}
 		return nil
 	}
-	vd["odd"] = func(i interface{}) error {
+	vd["odd"] = func(i interface{}) interface{} {
 		n := i.(int)
 		if n&1 == 0 {
 			return fmt.Errorf("%d is not odd", n)
@@ -165,14 +165,14 @@ func ExampleV_Validate_struct() {
 	}
 
 	vd := make(V)
-	vd["nonzero"] = func(i interface{}) error {
+	vd["nonzero"] = func(i interface{}) interface{} {
 		n := i.(int)
 		if n == 0 {
 			return fmt.Errorf("should be nonzero")
 		}
 		return nil
 	}
-	vd["odd"] = func(i interface{}) error {
+	vd["odd"] = func(i interface{}) interface{} {
 		x := i.(X)
 		if x.A&1 == 0 {
 			return fmt.Errorf("%d is not odd", x.A)
@@ -201,14 +201,14 @@ func ExampleV_Validate_struct2() {
 	}
 
 	vd := make(V)
-	vd["nonzero"] = func(i interface{}) error {
+	vd["nonzero"] = func(i interface{}) interface{} {
 		n := i.(int)
 		if n == 0 {
 			return fmt.Errorf("should be nonzero")
 		}
 		return nil
 	}
-	vd["odd"] = func(i interface{}) error {
+	vd["odd"] = func(i interface{}) interface{} {
 		x := i.(X)
 		if x.A&1 == 0 {
 			return fmt.Errorf("%d is not odd", x.A)
@@ -233,7 +233,7 @@ func TestV_Validate_uninterfaceable(t *testing.T) {
 	}
 
 	vd := make(V)
-	vd["nonzero"] = func(i interface{}) error {
+	vd["nonzero"] = func(i interface{}) interface{} {
 		n := i.(int)
 		if n == 0 {
 			return fmt.Errorf("should be nonzero")
@@ -252,7 +252,7 @@ func TestV_Validate_uninterfaceable(t *testing.T) {
 
 func TestV_Validate_nonstruct(t *testing.T) {
 	vd := make(V)
-	vd["wrong"] = func(i interface{}) error {
+	vd["wrong"] = func(i interface{}) interface{} {
 		return fmt.Errorf("WRONG: %v", i)
 	}
 
@@ -268,7 +268,7 @@ func TestV_Validate_json_name(t *testing.T) {
 	}
 
 	vd := make(V)
-	vd["nonzero"] = func(i interface{}) error {
+	vd["nonzero"] = func(i interface{}) interface{} {
 		n := i.(int)
 		if n == 0 {
 			return fmt.Errorf("should be nonzero")
@@ -300,7 +300,7 @@ func TestV_Validate_json_name_nested(t *testing.T) {
 	}
 
 	vd := make(V)
-	vd["nonzero"] = func(i interface{}) error {
+	vd["nonzero"] = func(i interface{}) interface{} {
 		n := i.(int)
 		if n == 0 {
 			return fmt.Errorf("should be nonzero")
@@ -342,7 +342,7 @@ func TestV_Validate_field_order(t *testing.T) {
 
 	maxLen := 4
 	vd := make(V)
-	vd["long"] = func(i interface{}) error {
+	vd["long"] = func(i interface{}) interface{} {
 		s := i.(string)
 		if len(s) < 5 {
 			return fmt.Errorf("%q is too short", s)
@@ -350,7 +350,7 @@ func TestV_Validate_field_order(t *testing.T) {
 		maxLen = len(s)
 		return nil
 	}
-	vd["longer"] = func(i interface{}) error {
+	vd["longer"] = func(i interface{}) interface{} {
 		s := i.(string)
 		if len(s) <= maxLen {
 			return fmt.Errorf("%q is too short, should be longer than %d",
