@@ -13,9 +13,9 @@ var (
 		"nonnegative":    nonnegativeValidator,
 		"nonempty":       nonemptyValidator,
 		"notnull":        notnullValidator,
-		"strlimit-2-2":   strLimit(2, 2),
-		"strlimit-1-20":  strLimit(1, 20),
-		"strlimit-1-128": strLimit(1, 128),
+		"strlimit-2-2":   StrLimit(2, 2),
+		"strlimit-1-20":  StrLimit(1, 20),
+		"strlimit-1-128": StrLimit(1, 128),
 	}
 )
 
@@ -63,7 +63,7 @@ func nonemptyValidator(src interface{}) interface{} {
 	return nil
 }
 
-func strLimit(min, max uint) validate.ValidatorFn {
+func StrLimit(min, max uint) validate.ValidatorFn {
 	typErr := "Should be a string or byte array"
 	minErr := fmt.Sprintf("Minimal length is %d", min)
 	maxErr := fmt.Sprintf("Maximal length is %d", max)

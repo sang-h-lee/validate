@@ -62,20 +62,20 @@ func TestStrLimitValidator(t *testing.T) {
 	maxErr := func(n int) string { return fmt.Sprintf("Maximal length is %d", n) }
 	minErr := func(n int) string { return fmt.Sprintf("Minimal length is %d", n) }
 
-	Ω(strLimit(0, 0)("")).ShouldNot(HaveOccurred())
-	Ω(strLimit(2, 2)("aa")).ShouldNot(HaveOccurred())
-	Ω(strLimit(0, 5)("")).ShouldNot(HaveOccurred())
-	Ω(strLimit(3, 5)("12345")).ShouldNot(HaveOccurred())
-	Ω(strLimit(2, 4)("123")).ShouldNot(HaveOccurred())
+	Ω(StrLimit(0, 0)("")).ShouldNot(HaveOccurred())
+	Ω(StrLimit(2, 2)("aa")).ShouldNot(HaveOccurred())
+	Ω(StrLimit(0, 5)("")).ShouldNot(HaveOccurred())
+	Ω(StrLimit(3, 5)("12345")).ShouldNot(HaveOccurred())
+	Ω(StrLimit(2, 4)("123")).ShouldNot(HaveOccurred())
 
-	Ω(strLimit(1, 2)("")).Should(Equal(minErr(1)))
-	Ω(strLimit(10, 20)("abcd ef")).Should(Equal(minErr(10)))
-	Ω(strLimit(0, 5)("123456")).Should(Equal(maxErr(5)))
-	Ω(strLimit(0, 3)("1234567")).Should(Equal(maxErr(3)))
+	Ω(StrLimit(1, 2)("")).Should(Equal(minErr(1)))
+	Ω(StrLimit(10, 20)("abcd ef")).Should(Equal(minErr(10)))
+	Ω(StrLimit(0, 5)("123456")).Should(Equal(maxErr(5)))
+	Ω(StrLimit(0, 3)("1234567")).Should(Equal(maxErr(3)))
 
-	Ω(strLimit(0, 1)(nil)).Should(Equal(nonstringErr))
-	Ω(strLimit(0, 2)(1)).Should(Equal(nonstringErr))
-	Ω(strLimit(1, 40)(12.1)).Should(Equal(nonstringErr))
+	Ω(StrLimit(0, 1)(nil)).Should(Equal(nonstringErr))
+	Ω(StrLimit(0, 2)(1)).Should(Equal(nonstringErr))
+	Ω(StrLimit(1, 40)(12.1)).Should(Equal(nonstringErr))
 }
 
 func TestNotNull(t *testing.T) {
