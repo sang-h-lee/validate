@@ -119,6 +119,30 @@ func TestNotNull(t *testing.T) {
 	Ω(notnullValidator(struct{ X int }{})).ShouldNot(HaveOccurred())
 }
 
+func TestRegexpValidator(t *testing.T) {
+	RegisterTestingT(t)
+
+	errMsg := func(p string) string {
+		return "Value should match the pattern: " + p
+	}
+
+	Ω(REMatch("")("")).Should(BeNil())
+	Ω(REMatch("abc")("a")).Should(Equal(errMsg("abc")))
+	Ω(REMatch("^abc")("aabc")).Should(Equal(errMsg("^abc")))
+
+	Ω(REMatch("")([]byte{})).Should(BeNil())
+	Ω(REMatch("w")([]byte("qwe"))).Should(BeNil())
+	Ω(REMatch("a?b?c")([]byte("bbb"))).Should(Equal(errMsg("a?b?c")))
+
+	v := REMatch("^ab+a$", "fail")
+	Ω(v("aba")).Should(BeNil())
+	Ω(v([]byte("abbbba"))).Should(BeNil())
+	Ω(v("ababa")).Should(Equal("fail"))
+	Ω(v([]byte("aa"))).Should(Equal("fail"))
+
+	Ω(notnullValidator(1)).ShouldNot(Equal("Unsupported type"))
+}
+
 func TestValidatorArray(t *testing.T) {
 	RegisterTestingT(t)
 

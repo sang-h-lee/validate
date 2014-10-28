@@ -3,6 +3,7 @@ package validators
 import (
 	"fmt"
 	"reflect"
+	"regexp"
 	"unicode/utf8"
 
 	"github.com/PlanitarInc/validate"
@@ -109,6 +110,33 @@ func notnullValidator(src interface{}) interface{} {
 			return "Expected non null pointer"
 		}
 
+		return nil
+	}
+}
+
+func REMatch(pattern string, mismatchError ...interface{}) validate.ValidatorFn {
+	re := regexp.MustCompile(pattern)
+	var mismatchErr interface{}
+	if len(mismatchError) == 0 {
+		mismatchErr = "Value should match the pattern: " + pattern
+	} else {
+		mismatchErr = mismatchError[0]
+	}
+
+	return func(src interface{}) interface{} {
+		var match bool
+		switch src.(type) {
+		default:
+			return "Unsupported type"
+
+		case []byte:
+			match = re.Match(src.([]byte))
+		case string:
+			match = re.MatchString(src.(string))
+		}
+		if !match {
+			return mismatchErr
+		}
 		return nil
 	}
 }
