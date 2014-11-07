@@ -9,6 +9,13 @@ import (
 	"github.com/PlanitarInc/validate"
 )
 
+const (
+	/* XXX This should be sufficient for 99% of the cases */
+	idPattern         = `([0-9a-zA-Z][-0-9a-zA-Z.+_]*)?[0-9a-zA-Z]`
+	domainnamePattern = idPattern + `\.[a-zA-Z]{2,10}`
+	emailPattern      = idPattern + `@` + domainnamePattern
+)
+
 var (
 	V = validate.V{
 		"nonnegative":    nonnegativeValidator,
@@ -17,6 +24,7 @@ var (
 		"strlimit-2-2":   StrLimit(2, 2),
 		"strlimit-1-20":  StrLimit(1, 20),
 		"strlimit-1-128": StrLimit(1, 128),
+		"email":          REMatch(emailPattern, "invalid email"),
 	}
 )
 

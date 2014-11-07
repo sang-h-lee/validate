@@ -143,6 +143,26 @@ func TestRegexpValidator(t *testing.T) {
 	Ω(notnullValidator(1)).ShouldNot(Equal("Unsupported type"))
 }
 
+func TestEmailValidator(t *testing.T) {
+	RegisterTestingT(t)
+
+	v, ok := V["email"]
+	Ω(ok).Should(BeTrue())
+
+	Ω(v("d@p.aa")).Should(BeNil())
+	Ω(v("dmitri@planitar.com")).Should(BeNil())
+	Ω(v("D.m.I.t.R.i@p.L.a.N.i.T.a.R.cOm")).Should(BeNil())
+
+	Ω(v("bad.@addr.com")).Should(Equal("invalid email"))
+	Ω(v("@bad.com")).Should(Equal("invalid email"))
+	Ω(v("a@bad.")).Should(Equal("invalid email"))
+	Ω(v("a@.bad.com")).Should(Equal("invalid email"))
+	Ω(v("a@a")).Should(Equal("invalid email"))
+	Ω(v("@")).Should(Equal("invalid email"))
+	Ω(v("")).Should(Equal("invalid email"))
+	Ω(v("sdasd.asdas.com")).Should(Equal("invalid email"))
+}
+
 func TestValidatorArray(t *testing.T) {
 	RegisterTestingT(t)
 
@@ -174,4 +194,6 @@ func TestValidatorArray(t *testing.T) {
 	Ω(ok).Should(BeTrue())
 	Ω(v("")).Should(Equal("Minimal length is 1"))
 	Ω(v(strings.Repeat("1", 129))).Should(Equal("Maximal length is 128"))
+
+	/* Presence of email validator was tested in TestEmailValidator() */
 }
