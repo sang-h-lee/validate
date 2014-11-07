@@ -25,6 +25,7 @@ var (
 		"strlimit-1-20":  StrLimit(1, 20),
 		"strlimit-1-128": StrLimit(1, 128),
 		"email":          REMatch(emailPattern, "invalid email"),
+		"password":       PasswordValidator,
 	}
 )
 
@@ -147,4 +148,25 @@ func REMatch(pattern string, mismatchError ...interface{}) validate.ValidatorFn 
 		}
 		return nil
 	}
+}
+
+func PasswordValidator(src interface{}) interface{} {
+	str, ok := src.(string)
+	if !ok {
+		return "invalid password"
+	}
+
+	if len(str) < 8 || len(str) > 128 {
+		return "invalid password"
+	}
+	if m, e := regexp.MatchString("[a-z]", str); !m || e != nil {
+		return "invalid password"
+	}
+	if m, e := regexp.MatchString("[A-Z]", str); !m || e != nil {
+		return "invalid password"
+	}
+	if m, e := regexp.MatchString("[0-9]", str); !m || e != nil {
+		return "invalid password"
+	}
+	return nil
 }

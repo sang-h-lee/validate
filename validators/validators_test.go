@@ -163,6 +163,21 @@ func TestEmailValidator(t *testing.T) {
 	Ω(v("sdasd.asdas.com")).Should(Equal("invalid email"))
 }
 
+func TestPasswordValidator(t *testing.T) {
+	RegisterTestingT(t)
+
+	Ω(PasswordValidator("")).Should(Equal("invalid password"))
+	Ω(PasswordValidator("bcDEF67")).Should(Equal("invalid password"))
+	Ω(PasswordValidator("aaaaaaaaa")).Should(Equal("invalid password"))
+	Ω(PasswordValidator("AAAAAAAAA")).Should(Equal("invalid password"))
+	Ω(PasswordValidator("aAaAaAaAa")).Should(Equal("invalid password"))
+	Ω(PasswordValidator("1010101010")).Should(Equal("invalid password"))
+	Ω(PasswordValidator("aaaa101010")).Should(Equal("invalid password"))
+
+	Ω(PasswordValidator("bcDEF67_")).Should(BeNil())
+	Ω(PasswordValidator("Aaaa101010")).Should(BeNil())
+}
+
 func TestValidatorArray(t *testing.T) {
 	RegisterTestingT(t)
 
@@ -196,4 +211,8 @@ func TestValidatorArray(t *testing.T) {
 	Ω(v(strings.Repeat("1", 129))).Should(Equal("Maximal length is 128"))
 
 	/* Presence of email validator was tested in TestEmailValidator() */
+
+	v, ok = V["password"]
+	Ω(ok).Should(BeTrue())
+	Ω(v("")).Should(Equal("invalid password"))
 }
