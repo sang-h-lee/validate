@@ -76,6 +76,24 @@ func TestStrLimitValidator(t *testing.T) {
 	Ω(StrLimit(0, 1)(nil)).Should(Equal(nonstringErr))
 	Ω(StrLimit(0, 2)(1)).Should(Equal(nonstringErr))
 	Ω(StrLimit(1, 40)(12.1)).Should(Equal(nonstringErr))
+
+	arr := []string{}
+	Ω(StrLimit(1, 1)(arr)).Should(BeNil())
+	arr = []string{""}
+	errs := map[int]string{0: minErr(1)}
+	Ω(StrLimit(1, 1)(arr)).ShouldNot(Equal(errs))
+	arr = []string{"a"}
+	Ω(StrLimit(1, 1)(arr)).Should(BeNil())
+	arr = []string{"", "asd", "bsd", "qs", ""}
+	errs = map[int]string{0: minErr(1), 1: maxErr(2), 2: maxErr(2), 4: minErr(1)}
+	e := StrLimit(1, 2)(arr)
+	Ω(e).Should(HaveKeyWithValue(0, minErr(1)))
+	Ω(e).Should(HaveKeyWithValue(1, maxErr(2)))
+	Ω(e).Should(HaveKeyWithValue(2, maxErr(2)))
+	Ω(e).Should(HaveKeyWithValue(4, minErr(1)))
+	Ω(e).Should(HaveLen(4))
+	arr = []string{"aa", "ab", "ac", "a"}
+	Ω(StrLimit(1, 2)(arr)).Should(BeNil())
 }
 
 func TestNotNull(t *testing.T) {

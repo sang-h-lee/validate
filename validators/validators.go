@@ -80,17 +80,7 @@ func StrLimit(min, max uint) validate.ValidatorFn {
 	typErr := "Should be a string or byte array"
 	minErr := fmt.Sprintf("Minimal length is %d", min)
 	maxErr := fmt.Sprintf("Maximal length is %d", max)
-
-	return func(src interface{}) interface{} {
-		length := uint(0)
-		switch src.(type) {
-		default:
-			return typErr
-		case string:
-			length = uint(utf8.RuneCountInString(src.(string)))
-		case []byte:
-			length = uint(utf8.RuneCount(src.([]byte)))
-		}
+	validate := func(length uint) interface{} {
 		if length < min {
 			return minErr
 		}
@@ -98,6 +88,32 @@ func StrLimit(min, max uint) validate.ValidatorFn {
 			return maxErr
 		}
 		return nil
+	}
+
+	return func(src interface{}) interface{} {
+		length := uint(0)
+		switch src.(type) {
+		default:
+			return typErr
+		case []string:
+			arr := src.([]string)
+			errs := map[int]interface{}{}
+			for i := range arr {
+				if e := validate(uint(utf8.RuneCountInString(arr[i]))); e != nil {
+					errs[i] = e
+				}
+			}
+			if len(errs) > 0 {
+				return errs
+			}
+			return nil
+
+		case string:
+			length = uint(utf8.RuneCountInString(src.(string)))
+		case []byte:
+			length = uint(utf8.RuneCount(src.([]byte)))
+		}
+		return validate(length)
 	}
 }
 
