@@ -21,14 +21,22 @@ const (
 
 var (
 	V = validate.V{
-		"nonnegative":    nonnegativeValidator,
-		"nonempty":       nonemptyValidator,
-		"notnull":        notnullValidator,
-		"strlimit-2-2":   StrLimit(2, 2),
-		"strlimit-1-20":  StrLimit(1, 20),
-		"strlimit-1-128": StrLimit(1, 128),
-		"email":          REMatch(emailPattern, "invalid email"),
-		"password":       PasswordValidator,
+		"nonnegative":     nonnegativeValidator,
+		"nonempty":        nonemptyValidator,
+		"notnull":         notnullValidator,
+		"strlimit-2-2":    StrLimit(2, 2),
+		"strlimit-1-20":   StrLimit(1, 20),
+		"strlimit-1-128":  StrLimit(1, 128),
+		"strlimit-1-256":  StrLimit(1, 256),
+		"strlimit-1-512":  StrLimit(1, 512),
+		"strlimit-1-1024": StrLimit(1, 1024),
+		"strlimit-0-20":   StrLimit(0, 20),
+		"strlimit-0-256":  StrLimit(0, 256),
+		"strlimit-0-512":  StrLimit(0, 512),
+		"strlimit-0-1024": StrLimit(0, 1024),
+		"strlimit-0-2048": StrLimit(0, 2048),
+		"email":           REMatch(emailPattern, "invalid email"),
+		"password":        PasswordValidator,
 	}
 )
 
