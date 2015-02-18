@@ -169,6 +169,21 @@ func REMatch(pattern string, mismatchError ...interface{}) validate.ValidatorFn 
 			match = re.Match(src.([]byte))
 		case string:
 			match = re.MatchString(src.(string))
+		case []string:
+			arr := src.([]string)
+			errArr := make([]interface{}, len(arr))
+			match = true
+			for i := range arr {
+				if re.MatchString(arr[i]) {
+					continue
+				}
+				errArr[i] = mismatchErr
+				match = false
+			}
+			if !match {
+				return errArr
+			}
+			return nil
 		}
 		if !match {
 			return mismatchErr

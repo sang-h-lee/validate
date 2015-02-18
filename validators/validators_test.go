@@ -152,6 +152,15 @@ func TestRegexpValidator(t *testing.T) {
 	Ω(REMatch("w")([]byte("qwe"))).Should(BeNil())
 	Ω(REMatch("a?b?c")([]byte("bbb"))).Should(Equal(errMsg("a?b?c")))
 
+	Ω(REMatch("a")([]string{})).Should(BeNil())
+	Ω(REMatch("a")([]string{"a", "ba", "bab"})).Should(BeNil())
+	Ω(REMatch("a")([]string{"a", "bb", "bab"})).Should(Equal([]interface{}{
+		nil, errMsg("a"), nil,
+	}))
+	Ω(REMatch("c")([]string{"a", "bb", "bab"})).Should(Equal([]interface{}{
+		errMsg("c"), errMsg("c"), errMsg("c"),
+	}))
+
 	v := REMatch("^ab+a$", "fail")
 	Ω(v("aba")).Should(BeNil())
 	Ω(v([]byte("abbbba"))).Should(BeNil())
