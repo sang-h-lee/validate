@@ -41,6 +41,10 @@ import (
 	"strings"
 )
 
+type Validator interface {
+	Validate() interface{}
+}
+
 type ValidatorFn func(interface{}) interface{}
 
 // V is a map of tag names to validators.
@@ -79,17 +83,25 @@ func (v V) validate(errs map[string]interface{}, s interface{}) {
 		if !fv.CanInterface() {
 			continue
 		}
+
 		val := fv.Interface()
+		fieldName := f.Name
+		if jsonTag := f.Tag.Get("json"); jsonTag != "" {
+			fieldName = strings.SplitN(jsonTag, ",", 2)[0]
+		}
+
+		if validator, ok := val.(Validator); ok {
+			if errs2 := validator.Validate(); errs2 != nil {
+				errs[fieldName] = errs2
+			}
+			continue
+		}
+
 		tag := f.Tag.Get("validate")
 		if tag == "" {
 			continue
 		}
 		vts := strings.Split(tag, ",")
-
-		fieldName := f.Name
-		if jsonTag := f.Tag.Get("json"); jsonTag != "" {
-			fieldName = strings.SplitN(jsonTag, ",", 2)[0]
-		}
 
 		for _, vt := range vts {
 			if vt == "struct" {

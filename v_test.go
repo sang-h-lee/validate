@@ -2,6 +2,7 @@ package validate
 
 import (
 	"fmt"
+	"reflect"
 	"testing"
 )
 
@@ -412,4 +413,42 @@ func TestV_Validate_field_order(t *testing.T) {
 	}
 
 	// Output: map[C:"help me" is too long]
+}
+
+type ValidatorExample struct {
+	Error interface{}
+}
+
+func (v ValidatorExample) Validate() interface{} {
+	return v.Error
+}
+
+func TestV_Validate_Validator(t *testing.T) {
+	type X struct {
+		V ValidatorExample
+	}
+
+	vd := make(V)
+
+	xOk := X{V: ValidatorExample{}}
+	if errs := vd.Validate(&xOk); len(errs) != 0 {
+		t.Fatal("wrong error: expeted nil; got:", errs)
+	}
+
+	err1 := map[string]string{
+		"one": "qwe",
+		"two": "asd",
+	}
+	x1 := X{V: ValidatorExample{Error: err1}}
+	if errs := vd.Validate(&x1); !reflect.DeepEqual(errs["V"], err1) {
+		t.Fatal("wrong error: expeted ", err1, "; got:", errs)
+	}
+
+	err2 := map[string]string{
+		"two": "asd",
+	}
+	x2 := X{V: ValidatorExample{Error: err2}}
+	if errs := vd.Validate(&x2); !reflect.DeepEqual(errs["V"], err2) {
+		t.Fatal("wrong error: expeted ", err2, "; got:", errs)
+	}
 }
