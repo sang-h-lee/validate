@@ -41,8 +41,8 @@ import (
 	"strings"
 )
 
-type Validator interface {
-	Validate() interface{}
+type ValueValidator interface {
+	ValidateValue() interface{}
 }
 
 type ValueMapper interface {
@@ -94,8 +94,8 @@ func (v V) validate(errs map[string]interface{}, s interface{}) {
 			fieldName = strings.SplitN(jsonTag, ",", 2)[0]
 		}
 
-		if validator, ok := val.(Validator); ok {
-			if errs2 := validator.Validate(); errs2 != nil {
+		if validator, ok := val.(ValueValidator); ok {
+			if errs2 := validator.ValidateValue(); errs2 != nil {
 				errs[fieldName] = errs2
 			}
 			continue

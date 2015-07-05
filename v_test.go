@@ -419,7 +419,7 @@ type ValidatorExample struct {
 	Error interface{}
 }
 
-func (v ValidatorExample) Validate() interface{} {
+func (v ValidatorExample) ValidateValue() interface{} {
 	return v.Error
 }
 
