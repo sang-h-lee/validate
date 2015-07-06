@@ -45,6 +45,10 @@ type Validator interface {
 	Validate() interface{}
 }
 
+type ValueMapper interface {
+	MapValue() interface{}
+}
+
 type ValidatorFn func(interface{}) interface{}
 
 // V is a map of tag names to validators.
@@ -95,6 +99,10 @@ func (v V) validate(errs map[string]interface{}, s interface{}) {
 				errs[fieldName] = errs2
 			}
 			continue
+		}
+
+		if vmapper, ok := val.(ValueMapper); ok {
+			val = vmapper.MapValue()
 		}
 
 		tag := f.Tag.Get("validate")

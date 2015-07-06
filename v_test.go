@@ -452,3 +452,61 @@ func TestV_Validate_Validator(t *testing.T) {
 		t.Fatal("wrong error: expeted ", err2, "; got:", errs)
 	}
 }
+
+type ArrMapper struct {
+	Arr []string
+}
+
+func (a ArrMapper) MapValue() interface{} {
+	return a.Arr
+}
+
+func TestV_Validate_ValueMapper(t *testing.T) {
+	type X struct {
+		A ArrMapper `validate:"long"`
+	}
+
+	vd := make(V)
+	vd["long"] = func(i interface{}) interface{} {
+		s := i.([]string)
+		res := map[int]error{}
+		for i := range s {
+			if len(s[i]) < 5 {
+				res[i] = fmt.Errorf("%q is too short", s[i])
+			}
+		}
+		if len(res) != 0 {
+			return res
+		}
+		return nil
+	}
+
+	xEmpty := X{A: ArrMapper{Arr: []string{}}}
+	if errs := vd.Validate(&xEmpty); len(errs) != 0 {
+		t.Fatal("wrong error: expeted nil; got:", errs)
+	}
+
+	xOk := X{A: ArrMapper{Arr: []string{"qweas", "12345"}}}
+	if errs := vd.Validate(&xOk); len(errs) != 0 {
+		t.Fatal("wrong error: expeted nil; got:", errs)
+	}
+
+	x := X{A: ArrMapper{Arr: []string{"q", "qweqwe", "asd"}}}
+	errs := vd.Validate(&x)
+	if len(errs) != 1 {
+		t.Fatal(`wrong number of errors: expected 1; got:`, errs)
+	}
+	if errs["A"] == nil {
+		t.Fatal(`wrong errors: expected error for "A"; got:`, errs)
+	}
+	aErrs := errs["A"].(map[int]error)
+	if aErrs[0].(error).Error() != `"q" is too short` {
+		t.Fatal(`wrong :`, aErrs)
+	}
+	if aErrs[2].(error).Error() != `"asd" is too short` {
+		t.Fatal(`wrong :`, aErrs)
+	}
+	if len(aErrs) != 2 {
+		t.Fatal(`wrong number of errors: expected 2; got:`, errs)
+	}
+}
