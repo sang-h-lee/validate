@@ -59,8 +59,8 @@ func TestStrLimitValidator(t *testing.T) {
 	RegisterTestingT(t)
 
 	nonstringErr := "Should be a string or byte array"
-	maxErr := func(n int) string { return fmt.Sprintf("Maximal length is %d", n) }
-	minErr := func(n int) string { return fmt.Sprintf("Minimal length is %d", n) }
+	maxErr := func(n int) string { return fmt.Sprintf("Maximum length is %d", n) }
+	minErr := func(n int) string { return fmt.Sprintf("Minimum length is %d", n) }
 
 	Ω(StrLimit(0, 0)("")).ShouldNot(HaveOccurred())
 	Ω(StrLimit(2, 2)("aa")).ShouldNot(HaveOccurred())
@@ -227,18 +227,18 @@ func TestValidatorArray(t *testing.T) {
 
 	v, ok = V["strlimit-2-2"]
 	Ω(ok).Should(BeTrue())
-	Ω(v("1")).Should(Equal("Minimal length is 2"))
-	Ω(v("123")).Should(Equal("Maximal length is 2"))
+	Ω(v("1")).Should(Equal("Minimum length is 2"))
+	Ω(v("123")).Should(Equal("Maximum length is 2"))
 
 	v, ok = V["strlimit-1-20"]
 	Ω(ok).Should(BeTrue())
-	Ω(v("")).Should(Equal("Minimal length is 1"))
-	Ω(v(strings.Repeat("1", 21))).Should(Equal("Maximal length is 20"))
+	Ω(v("")).Should(Equal("Minimum length is 1"))
+	Ω(v(strings.Repeat("1", 21))).Should(Equal("Maximum length is 20"))
 
 	v, ok = V["strlimit-1-128"]
 	Ω(ok).Should(BeTrue())
-	Ω(v("")).Should(Equal("Minimal length is 1"))
-	Ω(v(strings.Repeat("1", 129))).Should(Equal("Maximal length is 128"))
+	Ω(v("")).Should(Equal("Minimum length is 1"))
+	Ω(v(strings.Repeat("1", 129))).Should(Equal("Maximum length is 128"))
 
 	/* Presence of email validator was tested in TestEmailValidator() */
 

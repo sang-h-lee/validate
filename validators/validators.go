@@ -86,8 +86,8 @@ func nonemptyValidator(src interface{}) interface{} {
 
 func StrLimit(min, max uint) validate.ValidatorFn {
 	typErr := "Should be a string or byte array"
-	minErr := fmt.Sprintf("Minimal length is %d", min)
-	maxErr := fmt.Sprintf("Maximal length is %d", max)
+	minErr := fmt.Sprintf("Minimum length is %d", min)
+	maxErr := fmt.Sprintf("Maximum length is %d", max)
 	validate := func(length uint) interface{} {
 		if length < min {
 			return minErr
