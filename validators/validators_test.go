@@ -179,6 +179,9 @@ func TestEmailValidator(t *testing.T) {
 	Ω(v("d@p.aa")).Should(BeNil())
 	Ω(v("dmitri@planitar.com")).Should(BeNil())
 	Ω(v("D.m.I.t.R.i@p.L.a.N.i.T.a.R.cOm")).Should(BeNil())
+	Ω(v("angel's@yahoo.com")).Should(BeNil())
+	Ω(v("alyson.o'laughlin@wsdevelopment.com")).Should(BeNil())
+	Ω(v("happily_@planitar.com")).Should(BeNil())
 
 	Ω(v("-bad.@addr.com")).Should(Equal("invalid email"))
 	Ω(v("bad-@addr.com")).Should(Equal("invalid email"))
