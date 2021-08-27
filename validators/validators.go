@@ -14,8 +14,9 @@ const (
 	 * https://github.com/PlanitarInc/walk-inside-app/blob/master/app/lib/utils.js
 	 */
 	/* XXX This should be sufficient for 99% of the cases */
-	idPattern         = "([0-9a-zA-Z][-0-9a-zA-Z.+_']*)?[0-9a-zA-Z_]"
-	domainnamePattern = idPattern + "\\.[a-zA-Z]{2,10}"
+	idPattern         = "([0-9a-zA-Z!#$%&'*+\\/=\\?^_`{|}~][-0-9a-zA-Z.!#$%&'*+-\\/=\\?^_`{|}~]*)?[0-9a-zA-Z!#$%&'*+\\/=\\?^_`{|}~]"
+	domainName        = "([0-9a-zA-Z][-0-9a-zA-Z.+_]*)?[0-9a-zA-Z_]"
+	domainnamePattern = domainName + "\\.[a-zA-Z]{2,10}"
 	emailPattern      = "^" + idPattern + "@" + domainnamePattern + "$"
 )
 
