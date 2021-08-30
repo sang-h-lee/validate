@@ -85,7 +85,6 @@ func TestStrLimitValidator(t *testing.T) {
 	arr = []string{"a"}
 	Ω(StrLimit(1, 1)(arr)).Should(BeNil())
 	arr = []string{"", "asd", "bsd", "qs", ""}
-	errs = map[int]string{0: minErr(1), 1: maxErr(2), 2: maxErr(2), 4: minErr(1)}
 	e := StrLimit(1, 2)(arr)
 	Ω(e).Should(HaveKeyWithValue(0, minErr(1)))
 	Ω(e).Should(HaveKeyWithValue(1, maxErr(2)))
@@ -182,11 +181,13 @@ func TestEmailValidator(t *testing.T) {
 	Ω(v("angel's@yahoo.com")).Should(BeNil())
 	Ω(v("alyson.o'laughlin@wsdevelopment.com")).Should(BeNil())
 	Ω(v("happily_@planitar.com")).Should(BeNil())
+	Ω(v("happily-@addr.com")).Should(BeNil())
+	Ω(v("-happily@addr.com")).Should(BeNil())
 
 	Ω(v("-bad.@addr.com")).Should(Equal("invalid email"))
-	Ω(v("bad-@addr.com")).Should(Equal("invalid email"))
 	Ω(v(".bad.@addr.com")).Should(Equal("invalid email"))
 	Ω(v("bad.@addr.com")).Should(Equal("invalid email"))
+	Ω(v("bad..mail@addr.com")).Should(Equal("invalid email"))
 	Ω(v("@bad.com")).Should(Equal("invalid email"))
 	Ω(v("a@bad.")).Should(Equal("invalid email"))
 	Ω(v("a@.bad.com")).Should(Equal("invalid email"))

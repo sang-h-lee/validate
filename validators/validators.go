@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"reflect"
 	"regexp"
+	"strings"
 	"unicode/utf8"
 
 	"github.com/PlanitarInc/validate"
@@ -14,8 +15,9 @@ const (
 	 * https://github.com/PlanitarInc/walk-inside-app/blob/master/app/lib/utils.js
 	 */
 	/* XXX This should be sufficient for 99% of the cases */
-	idPattern         = "([0-9a-zA-Z!#$%&'*+\\/=\\?^_`{|}~][-0-9a-zA-Z.!#$%&'*+-\\/=\\?^_`{|}~]*)?[0-9a-zA-Z!#$%&'*+\\/=\\?^_`{|}~]"
-	domainName        = "([0-9a-zA-Z][-0-9a-zA-Z.+_]*)?[0-9a-zA-Z_]"
+	printable         = ".!#$%&'*+-\\/=\\?^_`{|}~"
+	idPattern         = "[0-9a-zA-Z" + printable + "][0-9a-zA-Z" + printable + "]*"
+	domainName        = "([0-9a-zA-Z][-0-9a-zA-Z.+_]*)?[0-9a-zA-Z]"
 	domainnamePattern = domainName + "\\.[a-zA-Z]{2,10}"
 	emailPattern      = "^" + idPattern + "@" + domainnamePattern + "$"
 )
@@ -169,6 +171,12 @@ func REMatch(pattern string, mismatchError ...interface{}) validate.ValidatorFn 
 		case []byte:
 			match = re.Match(src.([]byte))
 		case string:
+			if fmt.Sprintf("%v", mismatchErr) == "invalid email" {
+				if len(v) < 1 || v[:1] == "." || strings.Contains(v, "..") || strings.Contains(v, ".@") {
+					return mismatchErr
+				}
+			}
+			
 			match = re.MatchString(src.(string))
 		case []string:
 			arr := src.([]string)
